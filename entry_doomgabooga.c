@@ -1,0 +1,116 @@
+#include "doomgeneric/doomgeneric.h"
+#include "doomgeneric/doomkeys.h"
+#include "doomgeneric/m_argv.h"
+
+f64 start_time = 0;
+
+Gfx_Image *image = NULL;
+
+Gfx_Image * create_image(int width, int height){
+  Gfx_Image *image = alloc(get_heap_allocator(), sizeof(Gfx_Image));
+
+  image->width = width;
+  image->height = height;
+  image->gfx_handle = GFX_INVALID_HANDLE;  // This is handled in gfx
+  image->allocator = get_heap_allocator();
+  image->channels = 4;
+
+  void *data = alloc(get_heap_allocator(), width * height * sizeof(u32));
+  gfx_init_image(image, data);
+
+  return image;
+}
+
+void DG_Init() {
+  window.scaled_width = DOOMGENERIC_RESX;
+  window.scaled_height = DOOMGENERIC_RESY;
+  window.x = 100;
+  window.y = 100;
+  window.clear_color = hex_to_rgba(0x181818FF);
+  window.title = STR("DOOMgabooga");
+
+  start_time = os_get_current_time_in_seconds();
+  image = create_image(DOOMGENERIC_RESX, DOOMGENERIC_RESY);
+}
+
+void DG_DrawFrame() {
+  draw_frame.projection = m4_make_orthographic_projection(0, window.width, 0, window.height, -1, 10);
+  draw_frame.view = m4_scalar(1.0);
+
+  gfx_set_image_data(image, 0, 0, DOOMGENERIC_RESX, DOOMGENERIC_RESY, DG_ScreenBuffer);
+	draw_image(image, v2(0, 0), v2(DOOMGENERIC_RESX, DOOMGENERIC_RESY), COLOR_WHITE);
+}
+
+void DG_SleepMs(uint32_t ms) { 
+  os_sleep(ms);
+}
+
+uint32_t DG_GetTicksMs() {
+  return GetTickCount();
+}
+
+int DG_GetKey(int *pressed, unsigned char *doomKey) {
+
+#define KP(ok, dk)                   \
+  if(is_key_just_pressed((ok))){     \
+    consume_key_just_pressed((ok));  \
+    *pressed = 1;                    \
+    *doomKey = (dk);                 \
+    return 1;                        \
+  }
+
+#define KR(ok, dk)                    \
+  if(is_key_just_released((ok))) {    \
+    consume_key_just_released((ok));  \
+    *pressed = 0;                     \
+    *doomKey = (dk);                  \
+    return 1;                         \
+  }
+
+#define K(ok, dk) \
+  KP(ok, dk);     \
+  KR(ok, dk)
+
+  K(KEY_ENTER, KEY_ENTER);
+  K(KEY_ESCAPE, KEY_ESCAPE);
+  K(KEY_ESCAPE, KEY_ESCAPE);
+  K(KEY_ARROW_LEFT, KEY_LEFTARROW);
+  K(KEY_ARROW_RIGHT, KEY_RIGHTARROW);
+  K(KEY_ARROW_UP, KEY_UPARROW);
+  K(KEY_ARROW_DOWN, KEY_DOWNARROW);
+  K(KEY_CTRL, KEY_FIRE);
+  K(KEY_SPACEBAR, KEY_USE);
+  K(KEY_SHIFT, KEY_RSHIFT);
+
+  K('z', 'z');
+  K('Z', 'z');
+
+  K('n', 'n');
+  K('N', 'n');
+
+  K('y', 'y');
+  K('Y', 'y');
+
+  // TODO(gmb): other characters
+
+  return 0;
+}
+
+void DG_SetWindowTitle(const char *title) { 
+  window.title = STR(title); 
+}
+
+int entry(int argc, char **argv) {
+  doomgeneric_Create(argc, argv);
+
+  while (!window.should_close) {
+    reset_temporary_storage();
+
+    doomgeneric_Tick();
+
+    os_update();
+	  gfx_update();
+  }
+
+  return 0;
+}
