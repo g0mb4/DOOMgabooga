@@ -3,6 +3,7 @@
 #include "doomgeneric/m_argv.h"
 
 Gfx_Image *image = NULL;
+f64 start_time = 0;
 
 typedef struct {
   bool pressed;
@@ -38,7 +39,8 @@ static int get_key(int* pressed, u8* doomKey){
 }
 
 static void poll_keys(void){
-  #define KP(ok, dk)                                    \
+
+#define KP(ok, dk)                                      \
   if(is_key_just_pressed((ok))){                        \
     consume_key_just_pressed((ok));                     \
     add_key((Key_Event) { .pressed = 1, .key = (dk)});  \
@@ -84,6 +86,8 @@ Gfx_Image * create_image(int width, int height){
   image->channels = 4;
 
   void *data = alloc(get_heap_allocator(), width * height * sizeof(u32));
+  // assert(data, "Unable to allocate image data\n"); // TODO: does not find oogaboogas's assert, find out why
+
   gfx_init_image(image, data);
 
   return image;
@@ -98,6 +102,7 @@ void DG_Init() {
   window.title = STR("DOOMgabooga");
 
   image = create_image(DOOMGENERIC_RESX, DOOMGENERIC_RESY);
+  start_time = os_get_current_time_in_seconds();
 }
 
 void DG_DrawFrame() {
@@ -118,7 +123,8 @@ void DG_SleepMs(u32 ms) {
 }
 
 u32 DG_GetTicksMs() {
-  return GetTickCount();
+  const f64 elapsed = os_get_current_time_in_seconds() - start_time;
+  return (u32)(elapsed * 1000.0);
 }
 
 int DG_GetKey(int *pressed, unsigned char *doomKey) {

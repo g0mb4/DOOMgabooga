@@ -22,9 +22,6 @@
 
 #include <stdarg.h>
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
 #include "config.h"
 
 #include "deh_str.h"
