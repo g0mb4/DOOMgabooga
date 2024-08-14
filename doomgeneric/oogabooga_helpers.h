@@ -15,7 +15,6 @@
         dealloc(get_heap_allocator(), s.data);                          \
     } while(0)      
 
-u32 ogb_strlen(const char *s);
 char * ogb_strdup(const char *s);
 
 #endif // OOBABOOGA_HELPERS_H

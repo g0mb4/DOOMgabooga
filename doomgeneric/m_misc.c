@@ -282,7 +282,7 @@ char *M_StringDuplicate(const char *orig)
     if (result == NULL)
     {
         I_Error("Failed to duplicate string (length %i)\n",
-                ogb_strlen(orig));
+                strlen(orig));
     }
 
     return result;
