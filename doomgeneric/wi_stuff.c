@@ -451,6 +451,12 @@ void WI_drawEL(void)
 {
     int y = WI_TITLEY;
 
+	// TODO(gmb): This was not here, but it can crash, 
+	// something is fishy with the memory management.
+	if(!entering){
+		return;
+	}
+
     // draw "Entering"
     V_DrawPatch((SCREENWIDTH - SHORT(entering->width))/2,
 		y,
@@ -517,7 +523,7 @@ WI_drawOnLnode
 void WI_initAnimatedBack(void)
 {
     int		i;
-    anim_wi_t*	a, **a1;
+    anim_wi_t*	a, **a_arr;
 
     if (gamemode == commercial)
 		return;
@@ -527,8 +533,14 @@ void WI_initAnimatedBack(void)
 
     for (i=0;i<NUMANIMS[wbs->epsd];i++)
     {
-		a1 = &anims_wi[wbs->epsd];
-		a = a1[i];
+		a_arr = &anims_wi[wbs->epsd];
+		a = a_arr[i];
+
+		// TODO(gmb): This was not here, but it can crash, 
+		// something is fishy with the memory management.
+		if(!a){
+			return;
+		}
 
 		// init variables
 		a->ctr = -1;
@@ -547,7 +559,7 @@ void WI_initAnimatedBack(void)
 void WI_updateAnimatedBack(void)
 {
     int		i;
-    anim_wi_t*	a, **a1;
+    anim_wi_t*	a, **a_arr;
 
     if (gamemode == commercial)
 	return;
@@ -557,49 +569,53 @@ void WI_updateAnimatedBack(void)
 
     for (i=0;i<NUMANIMS[wbs->epsd];i++)
     {
-		a1 = &anims_wi[wbs->epsd];
-		a = a1[i];
+		a_arr = &anims_wi[wbs->epsd];
+		a = a_arr[i];
 
-	if (bcnt == a->nexttic)
-	{
-	    switch (a->type)
-	    {
-	      case ANIM_ALWAYS:
-		if (++a->ctr >= a->nanims) a->ctr = 0;
-		a->nexttic = bcnt + a->period;
-		break;
-
-	      case ANIM_RANDOM:
-		a->ctr++;
-		if (a->ctr == a->nanims)
-		{
-		    a->ctr = -1;
-		    a->nexttic = bcnt+a->data2+(M_Random()%a->data1);
+		// TODO(gmb): This was not here, but it can crash, 
+		// something is fishy with the memory management.
+		if(!a){
+			return;
 		}
-		else a->nexttic = bcnt + a->period;
-		break;
-		
-	      case ANIM_LEVEL:
-		// gawd-awful hack for level anims_wi
-		if (!(state == StatCount && i == 7)
-		    && wbs->next == a->data1)
-		{
-		    a->ctr++;
-		    if (a->ctr == a->nanims) a->ctr--;
-		    a->nexttic = bcnt + a->period;
-		}
-		break;
-	    }
-	}
 
+		if (bcnt == a->nexttic)
+		{
+			switch (a->type)
+			{
+			case ANIM_ALWAYS:
+			if (++a->ctr >= a->nanims) a->ctr = 0;
+			a->nexttic = bcnt + a->period;
+			break;
+
+			case ANIM_RANDOM:
+			a->ctr++;
+			if (a->ctr == a->nanims)
+			{
+				a->ctr = -1;
+				a->nexttic = bcnt+a->data2+(M_Random()%a->data1);
+			}
+			else a->nexttic = bcnt + a->period;
+			break;
+			
+			case ANIM_LEVEL:
+			// gawd-awful hack for level anims_wi
+			if (!(state == StatCount && i == 7)
+				&& wbs->next == a->data1)
+			{
+				a->ctr++;
+				if (a->ctr == a->nanims) a->ctr--;
+				a->nexttic = bcnt + a->period;
+			}
+			break;
+			}
+		}
     }
-
 }
 
 void WI_drawAnimatedBack(void)
 {
     int			i;
-    anim_wi_t*		a, **a1;
+    anim_wi_t*		a, **a_arr;
 
     if (gamemode == commercial)
 	return;
@@ -609,8 +625,14 @@ void WI_drawAnimatedBack(void)
 
     for (i=0 ; i<NUMANIMS[wbs->epsd] ; i++)
     {
-		a1 = &anims_wi[wbs->epsd];
-		a = a1[i];
+		a_arr = &anims_wi[wbs->epsd];
+		a = a_arr[i];
+
+		// TODO(gmb): This was not here, but it can crash, 
+		// something is fishy with the memory management.
+		if(!a){
+			return;
+		}
 
 		if (a->ctr >= 0)
 			V_DrawPatch(a->loc.x, a->loc.y, a->p[a->ctr]);
@@ -1450,6 +1472,12 @@ void WI_drawStats(void)
     // line height
     int lh;	
 
+	// TODO(gmb): This was not here, but it can crash, 
+	// something is fishy with the memory management.
+	if(!num[0]){
+		return;
+	}
+
     lh = (3*SHORT(num[0]->height))/2;
 
     WI_slamBackground();
@@ -1556,7 +1584,7 @@ static void WI_loadUnloadData(load_callback_t callback)
 {
     int i, j;
     char name[9];
-    anim_wi_t *a, **a1;
+    anim_wi_t *a, **a_arr;
 
     if (gamemode == commercial)
     {
@@ -1587,8 +1615,16 @@ static void WI_loadUnloadData(load_callback_t callback)
 	{
 	    for (j=0;j<NUMANIMS[wbs->epsd];j++)
 	    {
-		a1 = &anims_wi[wbs->epsd];
-		a = a1[j];
+		
+		a_arr = &anims_wi[wbs->epsd];
+		a = a_arr[j];
+
+		// TODO(gmb): This was not here, but it can crash, 
+		// something is fishy with the memory management.
+		if(!a){
+			return;
+		}
+
 		for (i=0;i<a->nanims;i++)
 		{
 		    // MONDO HACK!
