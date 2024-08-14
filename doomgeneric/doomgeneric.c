@@ -17,7 +17,7 @@ void doomgeneric_Create(int argc, char **argv)
 
 	M_FindResponseFile();
 
-	DG_ScreenBuffer = alloc(get_heap_allocator(), DOOMGENERIC_RESX * DOOMGENERIC_RESY * 4);
+	DG_ScreenBuffer = alloc(get_heap_allocator(), SCREENWIDTH * SCREENHEIGHT * sizeof(pixel_t));
 	assert(DG_ScreenBuffer, "Unbale to create DG_ScreenBuffer");
 
 	DG_Init();

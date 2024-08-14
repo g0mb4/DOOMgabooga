@@ -5,6 +5,9 @@
 Gfx_Image *image = NULL;
 f64 start_time = 0;
 
+#define IMAGE_WIDTH 640
+#define IMAGE_HEIGHT 400
+
 typedef struct {
   bool pressed;
   u8 key;
@@ -94,14 +97,14 @@ Gfx_Image * create_image(int width, int height){
 }
 
 void DG_Init() {
-  window.scaled_width = DOOMGENERIC_RESX;
-  window.scaled_height = DOOMGENERIC_RESY;
+  window.scaled_width = IMAGE_WIDTH;
+  window.scaled_height = IMAGE_HEIGHT;
   window.x = 100;
   window.y = 100;
   window.clear_color = hex_to_rgba(0x181818FF);
   window.title = STR("DOOMgabooga");
 
-  image = create_image(DOOMGENERIC_RESX, DOOMGENERIC_RESY);
+  image = create_image(SCREENWIDTH, SCREENHEIGHT);
   start_time = os_get_current_time_in_seconds();
 }
 
@@ -109,8 +112,8 @@ void DG_DrawFrame() {
   draw_frame.projection = m4_make_orthographic_projection(0, window.width, 0, window.height, -1, 10);
   draw_frame.view = m4_scalar(1.0);
 
-  gfx_set_image_data(image, 0, 0, DOOMGENERIC_RESX, DOOMGENERIC_RESY, DG_ScreenBuffer);
-  draw_image(image, v2(0, 0), v2(DOOMGENERIC_RESX, DOOMGENERIC_RESY), COLOR_WHITE);
+  gfx_set_image_data(image, 0, 0, SCREENWIDTH, SCREENHEIGHT, DG_ScreenBuffer);
+  draw_image(image, v2(0, 0), v2(IMAGE_WIDTH, IMAGE_HEIGHT), COLOR_WHITE);
 
   gfx_update();
 }

@@ -2,14 +2,7 @@
 #define DOOM_GENERIC
 
 #include <stdint.h>
-
-#ifndef DOOMGENERIC_RESX
-#define DOOMGENERIC_RESX 640
-#endif  // DOOMGENERIC_RESX
-
-#ifndef DOOMGENERIC_RESY
-#define DOOMGENERIC_RESY 400
-#endif  // DOOMGENERIC_RESY
+#include "i_video.h"
 
 typedef uint32_t pixel_t;
 
