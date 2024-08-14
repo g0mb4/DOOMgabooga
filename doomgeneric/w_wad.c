@@ -110,8 +110,9 @@ static void ExtendLumpInfo(int newnumlumps)
     }
 
     // All done.
-    // TODO(gmb): Memory leak!
-    //dealloc(get_heap_allocator(), lumpinfo);
+    if(lumpinfo){
+        dealloc(get_heap_allocator(), lumpinfo);
+    }
     
     lumpinfo = newlumpinfo;
     numlumps = newnumlumps;
