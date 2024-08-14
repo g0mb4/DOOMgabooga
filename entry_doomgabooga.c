@@ -2,69 +2,52 @@
 #include "doomgeneric/doomkeys.h"
 #include "doomgeneric/m_argv.h"
 
-f64 start_time = 0;
-
 Gfx_Image *image = NULL;
 
-Gfx_Image * create_image(int width, int height){
-  Gfx_Image *image = alloc(get_heap_allocator(), sizeof(Gfx_Image));
+typedef struct {
+  bool pressed;
+  u8 key;
+} Key_Event;
 
-  image->width = width;
-  image->height = height;
-  image->gfx_handle = GFX_INVALID_HANDLE;  // This is handled in gfx
-  image->allocator = get_heap_allocator();
-  image->channels = 4;
+// ring buffer for keys
+#define KEY_RBUFFER_SIZE 16
+static Key_Event key_rbuffer[KEY_RBUFFER_SIZE];
+static u32 key_rbuffer_write_index = 0;
+static u32 key_rbuffer_read_index = 0;
 
-  void *data = alloc(get_heap_allocator(), width * height * sizeof(u32));
-  gfx_init_image(image, data);
-
-  return image;
+static void add_key(Key_Event e){
+  key_rbuffer[key_rbuffer_write_index] = e;
+  key_rbuffer_write_index++;
+  key_rbuffer_write_index %= KEY_RBUFFER_SIZE;
 }
 
-void DG_Init() {
-  window.scaled_width = DOOMGENERIC_RESX;
-  window.scaled_height = DOOMGENERIC_RESY;
-  window.x = 100;
-  window.y = 100;
-  window.clear_color = hex_to_rgba(0x181818FF);
-  window.title = STR("DOOMgabooga");
-
-  start_time = os_get_current_time_in_seconds();
-  image = create_image(DOOMGENERIC_RESX, DOOMGENERIC_RESY);
-}
-
-void DG_DrawFrame() {
-  draw_frame.projection = m4_make_orthographic_projection(0, window.width, 0, window.height, -1, 10);
-  draw_frame.view = m4_scalar(1.0);
-
-  gfx_set_image_data(image, 0, 0, DOOMGENERIC_RESX, DOOMGENERIC_RESY, DG_ScreenBuffer);
-	draw_image(image, v2(0, 0), v2(DOOMGENERIC_RESX, DOOMGENERIC_RESY), COLOR_WHITE);
-}
-
-void DG_SleepMs(uint32_t ms) { 
-  os_sleep(ms);
-}
-
-uint32_t DG_GetTicksMs() {
-  return GetTickCount();
-}
-
-int DG_GetKey(int *pressed, unsigned char *doomKey) {
-
-#define KP(ok, dk)                   \
-  if(is_key_just_pressed((ok))){     \
-    consume_key_just_pressed((ok));  \
-    *pressed = 1;                    \
-    *doomKey = (dk);                 \
-    return 1;                        \
+static int get_key(int* pressed, u8* doomKey){
+  // buffer is empty
+  if (key_rbuffer_read_index == key_rbuffer_write_index){
+    return 0;
   }
 
-#define KR(ok, dk)                    \
-  if(is_key_just_released((ok))) {    \
-    consume_key_just_released((ok));  \
-    *pressed = 0;                     \
-    *doomKey = (dk);                  \
-    return 1;                         \
+  Key_Event e = key_rbuffer[key_rbuffer_read_index];
+  key_rbuffer_read_index++;
+  key_rbuffer_read_index %= KEY_RBUFFER_SIZE;
+
+  *pressed = e.pressed;
+  *doomKey = e.key;
+
+  return 1;
+}
+
+static void poll_keys(void){
+  #define KP(ok, dk)                                    \
+  if(is_key_just_pressed((ok))){                        \
+    consume_key_just_pressed((ok));                     \
+    add_key((Key_Event) { .pressed = 1, .key = (dk)});  \
+  }
+
+#define KR(ok, dk)                                      \
+  if(is_key_just_released((ok))) {                      \
+    consume_key_just_released((ok));                    \
+    add_key((Key_Event) { .pressed = 0, .key = (dk)});  \
   }
 
 #define K(ok, dk) \
@@ -90,10 +73,57 @@ int DG_GetKey(int *pressed, unsigned char *doomKey) {
 
   K('y', 'y');
   K('Y', 'y');
+}
 
-  // TODO(gmb): other characters
+Gfx_Image * create_image(int width, int height){
+  Gfx_Image *image = alloc(get_heap_allocator(), sizeof(Gfx_Image));
 
-  return 0;
+  image->width = width;
+  image->height = height;
+  image->gfx_handle = GFX_INVALID_HANDLE;  // This is handled in gfx
+  image->allocator = get_heap_allocator();
+  image->channels = 4;
+
+  void *data = alloc(get_heap_allocator(), width * height * sizeof(u32));
+  gfx_init_image(image, data);
+
+  return image;
+}
+
+void DG_Init() {
+  window.scaled_width = DOOMGENERIC_RESX;
+  window.scaled_height = DOOMGENERIC_RESY;
+  window.x = 100;
+  window.y = 100;
+  window.clear_color = hex_to_rgba(0x181818FF);
+  window.title = STR("DOOMgabooga");
+
+  image = create_image(DOOMGENERIC_RESX, DOOMGENERIC_RESY);
+}
+
+void DG_DrawFrame() {
+  draw_frame.projection = m4_make_orthographic_projection(0, window.width, 0, window.height, -1, 10);
+  draw_frame.view = m4_scalar(1.0);
+
+  gfx_set_image_data(image, 0, 0, DOOMGENERIC_RESX, DOOMGENERIC_RESY, DG_ScreenBuffer);
+	draw_image(image, v2(0, 0), v2(DOOMGENERIC_RESX, DOOMGENERIC_RESY), COLOR_WHITE);
+
+  gfx_update();
+}
+
+void DG_SleepMs(u32 ms) { 
+  os_update();
+  poll_keys();
+
+  os_sleep(ms);
+}
+
+u32 DG_GetTicksMs() {
+  return GetTickCount();
+}
+
+int DG_GetKey(int *pressed, unsigned char *doomKey) {
+  return get_key(pressed, doomKey);
 }
 
 void DG_SetWindowTitle(const char *title) { 
@@ -107,9 +137,6 @@ int entry(int argc, char **argv) {
     reset_temporary_storage();
 
     doomgeneric_Tick();
-
-    os_update();
-	  gfx_update();
   }
 
   return 0;
