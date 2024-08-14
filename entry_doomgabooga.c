@@ -51,8 +51,8 @@ static void poll_keys(void){
   }
 
 #define K(ok, dk) \
-  KP(ok, dk);     \
-  KR(ok, dk)
+  KP((ok), (dk));     \
+  KR((ok), (dk))
 
   K(KEY_ENTER, KEY_ENTER);
   K(KEY_ESCAPE, KEY_ESCAPE);
@@ -65,14 +65,13 @@ static void poll_keys(void){
   K(KEY_SPACEBAR, KEY_USE);
   K(KEY_SHIFT, KEY_RSHIFT);
 
-  K('z', 'z');
-  K('Z', 'z');
+  for(char c = 'A'; c <= 'Z'; ++c){
+    char lower = c - 'A' + 'a';
+    K(c, lower);
+  }
 
-  K('n', 'n');
-  K('N', 'n');
-
-  K('y', 'y');
-  K('Y', 'y');
+  K('_', '_');
+  K('.', '.');
 }
 
 Gfx_Image * create_image(int width, int height){
