@@ -60,5 +60,6 @@ build/*
 
 *google_trace*
 
+.savegame/
 *.WAD
 *.wad
