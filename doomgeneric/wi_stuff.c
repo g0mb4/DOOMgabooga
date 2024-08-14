@@ -595,7 +595,7 @@ void WI_updateAnimatedBack(void)
 void WI_drawAnimatedBack(void)
 {
     int			i;
-    anim_wi_t*		a, **a_arr;
+    anim_wi_t*		a;
 
     if (gamemode == commercial)
 	return;
@@ -1551,7 +1551,7 @@ static void WI_loadUnloadData(load_callback_t callback)
 {
     int i, j;
     char name[9];
-    anim_wi_t *a, **a_arr;
+    anim_wi_t *a;
 
     if (gamemode == commercial){
 		for (i=0 ; i<NUMCMAPS ; i++) {
