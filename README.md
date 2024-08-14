@@ -11,6 +11,8 @@ Some memory related crashes are expected.
 
 I hope I changed every `%s` to `%cs` in `printf()`, but it might not be the case.
 
+No multiplayer.
+
 ## TODO
 + sound
 + general cleanup
