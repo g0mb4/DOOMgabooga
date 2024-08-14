@@ -451,12 +451,6 @@ void WI_drawEL(void)
 {
     int y = WI_TITLEY;
 
-	// TODO(gmb): This was not here, but it can crash, 
-	// something is fishy with the memory management.
-	if(!entering){
-		return;
-	}
-
     // draw "Entering"
     V_DrawPatch((SCREENWIDTH - SHORT(entering->width))/2,
 		y,
@@ -523,7 +517,7 @@ WI_drawOnLnode
 void WI_initAnimatedBack(void)
 {
     int		i;
-    anim_wi_t*	a, **a_arr;
+    anim_wi_t*	a;
 
     if (gamemode == commercial)
 		return;
@@ -533,14 +527,7 @@ void WI_initAnimatedBack(void)
 
     for (i=0;i<NUMANIMS[wbs->epsd];i++)
     {
-		a_arr = &anims_wi[wbs->epsd];
-		a = a_arr[i];
-
-		// TODO(gmb): This was not here, but it can crash, 
-		// something is fishy with the memory management.
-		if(!a){
-			return;
-		}
+		a = &anims_wi[wbs->epsd][i];
 
 		// init variables
 		a->ctr = -1;
@@ -559,7 +546,7 @@ void WI_initAnimatedBack(void)
 void WI_updateAnimatedBack(void)
 {
     int		i;
-    anim_wi_t*	a, **a_arr;
+    anim_wi_t*	a;
 
     if (gamemode == commercial)
 	return;
@@ -569,14 +556,7 @@ void WI_updateAnimatedBack(void)
 
     for (i=0;i<NUMANIMS[wbs->epsd];i++)
     {
-		a_arr = &anims_wi[wbs->epsd];
-		a = a_arr[i];
-
-		// TODO(gmb): This was not here, but it can crash, 
-		// something is fishy with the memory management.
-		if(!a){
-			return;
-		}
+		a = &anims_wi[wbs->epsd][i];
 
 		if (bcnt == a->nexttic)
 		{
@@ -625,14 +605,7 @@ void WI_drawAnimatedBack(void)
 
     for (i=0 ; i<NUMANIMS[wbs->epsd] ; i++)
     {
-		a_arr = &anims_wi[wbs->epsd];
-		a = a_arr[i];
-
-		// TODO(gmb): This was not here, but it can crash, 
-		// something is fishy with the memory management.
-		if(!a){
-			return;
-		}
+		a = &anims_wi[wbs->epsd][i];
 
 		if (a->ctr >= 0)
 			V_DrawPatch(a->loc.x, a->loc.y, a->p[a->ctr]);
@@ -1472,12 +1445,6 @@ void WI_drawStats(void)
     // line height
     int lh;	
 
-	// TODO(gmb): This was not here, but it can crash, 
-	// something is fishy with the memory management.
-	if(!num[0]){
-		return;
-	}
-
     lh = (3*SHORT(num[0]->height))/2;
 
     WI_slamBackground();
@@ -1586,62 +1553,46 @@ static void WI_loadUnloadData(load_callback_t callback)
     char name[9];
     anim_wi_t *a, **a_arr;
 
-    if (gamemode == commercial)
-    {
-	for (i=0 ; i<NUMCMAPS ; i++)
-	{
-	    DEH_snprintf(name, 9, "CWILV%2.2d", i);
-            callback(name, &lnames[i]);
-	}
-    }
-    else
-    {
-	for (i=0 ; i<NUMMAPS ; i++)
-	{
-	    DEH_snprintf(name, 9, "WILV%d%d", wbs->epsd, i);
-            callback(name, &lnames[i]);
-	}
-
-	// you are here
-        callback(DEH_String("WIURH0"), &yah[0]);
-
-	// you are here (alt.)
-        callback(DEH_String("WIURH1"), &yah[1]);
-
-	// splat
-        callback(DEH_String("WISPLAT"), &splat[0]);
-
-	if (wbs->epsd < 3)
-	{
-	    for (j=0;j<NUMANIMS[wbs->epsd];j++)
-	    {
-		
-		a_arr = &anims_wi[wbs->epsd];
-		a = a_arr[j];
-
-		// TODO(gmb): This was not here, but it can crash, 
-		// something is fishy with the memory management.
-		if(!a){
-			return;
+    if (gamemode == commercial){
+		for (i=0 ; i<NUMCMAPS ; i++) {
+			DEH_snprintf(name, 9, "CWILV%2.2d", i);
+			callback(name, &lnames[i]);
+		}
+    } else {
+		for (i=0 ; i<NUMMAPS ; i++) {
+			DEH_snprintf(name, 9, "WILV%d%d", wbs->epsd, i);
+			callback(name, &lnames[i]);
 		}
 
-		for (i=0;i<a->nanims;i++)
-		{
-		    // MONDO HACK!
-		    if (wbs->epsd != 1 || j != 8)
-		    {
-			// animations
-			DEH_snprintf(name, 9, "WIA%d%.2d%.2d", wbs->epsd, j, i);
-                        callback(name, &a->p[i]);
-		    }
-		    else
-		    {
-			// HACK ALERT!
-			a->p[i] = anims_wi[1][4].p[i];
-		    }
+		// you are here
+		callback(DEH_String("WIURH0"), &yah[0]);
+
+		// you are here (alt.)
+		callback(DEH_String("WIURH1"), &yah[1]);
+
+		// splat
+		callback(DEH_String("WISPLAT"), &splat[0]);
+
+		if (wbs->epsd < 3) {
+			for (j=0;j<NUMANIMS[wbs->epsd];j++){
+				a = &anims_wi[wbs->epsd][j];
+				for (i=0;i<a->nanims;i++)
+				{
+					// MONDO HACK!
+					if (wbs->epsd != 1 || j != 8)
+					{
+						// animations
+						DEH_snprintf(name, 9, "WIA%d%.2d%.2d", wbs->epsd, j, i);
+						callback(name, &a->p[i]);
+					}
+					else
+					{
+						// HACK ALERT!
+						a->p[i] = anims_wi[1][4].p[i];
+					}
+				}
+			}
 		}
-	    }
-	}
     }
 
     // More hacks on minus sign.
