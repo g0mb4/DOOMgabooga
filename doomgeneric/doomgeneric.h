@@ -1,7 +1,6 @@
 #ifndef DOOM_GENERIC
 #define DOOM_GENERIC
 
-#include <stdlib.h>
 #include <stdint.h>
 
 #ifndef DOOMGENERIC_RESX
@@ -14,12 +13,10 @@
 
 typedef uint32_t pixel_t;
 
-
 extern pixel_t* DG_ScreenBuffer;
 
 void doomgeneric_Create(int argc, char **argv);
 void doomgeneric_Tick();
-
 
 //Implement below functions for your platform
 void DG_Init();

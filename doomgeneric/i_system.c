@@ -15,13 +15,6 @@
 // DESCRIPTION:
 //
 
-
-
-#include <stdlib.h>
-#include <string.h>
-
-#include <stdarg.h>
-
 #include "config.h"
 
 #include "deh_str.h"

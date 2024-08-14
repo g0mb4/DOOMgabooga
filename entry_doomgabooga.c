@@ -86,7 +86,7 @@ Gfx_Image * create_image(int width, int height){
   image->channels = 4;
 
   void *data = alloc(get_heap_allocator(), width * height * sizeof(u32));
-  // assert(data, "Unable to allocate image data\n"); // TODO: does not find oogaboogas's assert, find out why
+  assert(data, "Unable to allocate image data");
 
   gfx_init_image(image, data);
 
@@ -110,7 +110,7 @@ void DG_DrawFrame() {
   draw_frame.view = m4_scalar(1.0);
 
   gfx_set_image_data(image, 0, 0, DOOMGENERIC_RESX, DOOMGENERIC_RESY, DG_ScreenBuffer);
-	draw_image(image, v2(0, 0), v2(DOOMGENERIC_RESX, DOOMGENERIC_RESY), COLOR_WHITE);
+  draw_image(image, v2(0, 0), v2(DOOMGENERIC_RESX, DOOMGENERIC_RESY), COLOR_WHITE);
 
   gfx_update();
 }

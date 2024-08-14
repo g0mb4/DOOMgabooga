@@ -17,11 +17,6 @@
 //	Sliders and icons. Kinda widget stuff.
 //
 
-
-#include <stdlib.h>
-#include <ctype.h>
-
-
 #include "doomdef.h"
 #include "doomkeys.h"
 #include "dstrings.h"

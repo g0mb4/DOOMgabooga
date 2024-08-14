@@ -23,10 +23,6 @@
 
 #undef FEATURE_WAD_MERGE
 
-// Enables dehacked support ('-deh')
-
-#undef FEATURE_DEHACKED
-
 // Enables multiplayer support (network games)
 
 #undef FEATURE_MULTIPLAYER

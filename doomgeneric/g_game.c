@@ -15,12 +15,6 @@
 // DESCRIPTION:  none
 //
 
-
-
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
-
 #include "doomdef.h" 
 #include "doomkeys.h"
 #include "doomstat.h"

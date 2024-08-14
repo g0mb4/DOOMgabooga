@@ -20,15 +20,10 @@
 //     DMXGUS lump into an equivalent Timidity configuration file.
 //
 
-
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
 #include "w_wad.h"
 #include "z_zone.h"
 
-#define strdup _strdup
+#include "oogabooga_helpers.h"
 
 #define MAX_INSTRUMENTS 256
 
@@ -123,7 +118,7 @@ static void ParseLine(gus_config_t *config, char *line)
     mapped_id = atoi(fields[MappingIndex()]);
 
     dealloc(get_heap_allocator(), config->patch_names[instr_id]);
-    config->patch_names[instr_id] = strdup(fields[5]);
+    config->patch_names[instr_id] = ogb_strdup(fields[5]);
     config->mapping[instr_id] = mapped_id;
 }
 

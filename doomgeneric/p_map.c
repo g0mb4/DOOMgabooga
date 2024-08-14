@@ -17,8 +17,6 @@
 //	Shooting and aiming.
 //
 
-#include <stdlib.h>
-
 #include "deh_misc.h"
 
 #include "m_bbox.h"

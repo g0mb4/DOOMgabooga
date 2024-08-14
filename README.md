@@ -16,5 +16,6 @@ No multiplayer.
 ## TODO
 + sound
 + general cleanup
++ remove ORIGCODE
 + fix warnings
 + fix TODOs

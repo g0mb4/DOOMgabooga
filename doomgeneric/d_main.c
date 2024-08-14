@@ -19,11 +19,6 @@
 //	and call the startup functions.
 //
 
-
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "config.h"
 #include "deh_main.h"
 #include "doomdef.h"
@@ -72,6 +67,8 @@
 #include "statdump.h"
 
 #include "d_main.h"
+
+#include "oogabooga_helpers.h"
 
 //
 // D-DoomLoop()
@@ -1127,7 +1124,7 @@ static void LoadIwadDeh(void)
         }
         else
         {
-            chex_deh = strdup("chex.deh");
+            chex_deh = ogb_ strdup("chex.deh");
         }
 
         // If the dehacked patch isn't found, try searching the WAD

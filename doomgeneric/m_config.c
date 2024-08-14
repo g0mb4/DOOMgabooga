@@ -17,12 +17,6 @@
 //    Configuration file interface.
 //
 
-
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <errno.h>
-
 #include "config.h"
 
 #include "doomtype.h"
@@ -34,7 +28,7 @@
 
 #include "z_zone.h"
 
-#define strdup _strdup
+#include "oogabooga_helpers.h"
 
 //
 // DEFAULTS
@@ -1719,7 +1713,7 @@ static int ParseIntParameter(char *strparm)
     int parm;
 
     if (strparm[0] == '0' && strparm[1] == 'x'){
-        assert(0, "sscanf()");
+        assert(false, "TODO: implement sscanf()");
         //sscanf(strparm+2, "%x", &parm);
     } else {
         parm = atoi(strparm);
@@ -1737,7 +1731,7 @@ static void SetVariable(default_t *def, char *value)
     switch (def->type)
     {
         case DEFAULT_STRING:
-            * (char **) def->location = strdup(value);
+            * (char **) def->location = ogb_strdup(value);
             break;
 
         case DEFAULT_INT:
@@ -2099,7 +2093,7 @@ char *M_GetSaveGameDir(char *iwadname)
 
     if (!strcmp(configdir, ""))
     {
-    	savegamedir = strdup("");
+    	savegamedir = ogb_strdup("");
     }
     else
     {

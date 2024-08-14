@@ -14,9 +14,6 @@
 //
 //
 
-#include <stdlib.h>
-#include <string.h>
-
 #include "memio.h"
 
 #include "z_zone.h"
@@ -190,5 +187,3 @@ int mem_fseek(MEMFILE *stream, signed long position, mem_rel_t whence)
 		return -1;
 	}
 }
-
-

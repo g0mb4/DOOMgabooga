@@ -13,13 +13,6 @@
 // GNU General Public License for more details.
 //
 
-
-#include <stdlib.h>
-#include <ctype.h>
-#include <math.h>
-#include <string.h>
-#include <fcntl.h>
-
 #include "config.h"
 #include "deh_str.h"
 #include "doomtype.h"

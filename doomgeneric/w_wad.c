@@ -16,13 +16,6 @@
 //	Handles WAD file header, directory, lump I/O.
 //
 
-
-
-
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "doomtype.h"
 
 #include "config.h"

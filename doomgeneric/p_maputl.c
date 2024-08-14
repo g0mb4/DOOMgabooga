@@ -20,11 +20,6 @@
 //	and some PIT_* functions to use for iteration.
 //
 
-
-
-#include <stdlib.h>
-
-
 #include "m_bbox.h"
 
 #include "doomdef.h"
@@ -996,6 +991,3 @@ P_PathTraverse
     // go through the sorted list
     return P_TraverseIntercepts ( trav, FRACUNIT );
 }
-
-
-

@@ -17,8 +17,6 @@
 //	all OS independend parts.
 //
 
-#include <stdlib.h>
-
 #include "doomfeatures.h"
 
 #include "d_main.h"

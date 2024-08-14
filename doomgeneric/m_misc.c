@@ -17,14 +17,6 @@
 //      Miscellaneous.
 //
 
-
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <errno.h>
-
-#define strdup _strdup
-
 #include "doomtype.h"
 
 #include "deh_str.h"
@@ -36,6 +28,8 @@
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
+
+#include "oogabooga_helpers.h"
 
 //
 // Create a directory
@@ -283,12 +277,12 @@ char *M_StringDuplicate(const char *orig)
 {
     char *result;
 
-    result = strdup(orig);
+    result = ogb_strdup(orig);
 
     if (result == NULL)
     {
         I_Error("Failed to duplicate string (length %i)\n",
-                strlen(orig));
+                ogb_strlen(orig));
     }
 
     return result;

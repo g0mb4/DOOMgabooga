@@ -16,12 +16,6 @@
 //     to the IWAD type.
 //
 
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
-
-#define strdup _strdup
-
 #include "config.h"
 #include "deh_str.h"
 #include "doomkeys.h"
@@ -32,6 +26,8 @@
 #include "m_misc.h"
 #include "w_wad.h"
 #include "z_zone.h"
+
+#include "oogabooga_helpers.h"
 
 static const iwad_t iwads[] =
 {
@@ -100,7 +96,7 @@ static char *CheckDirectoryHasIWAD(char *dir, char *iwadname)
 
     if (DirIsFile(dir, iwadname) && M_FileExists(dir))
     {
-        return strdup(dir);
+        return ogb_strdup(dir);
     }
 
     // Construct the full path to the IWAD if it is located in
@@ -108,7 +104,7 @@ static char *CheckDirectoryHasIWAD(char *dir, char *iwadname)
 
     if (!strcmp(dir, "."))
     {
-        filename = strdup(iwadname);
+        filename = ogb_strdup(iwadname);
     }
     else
     {
@@ -122,8 +118,7 @@ static char *CheckDirectoryHasIWAD(char *dir, char *iwadname)
         return filename;
     }
 
-    // TODO(gmb): Memory leak!
-    //dealloc(get_heap_allocator(), filename);
+    dealloc(get_heap_allocator(), filename);
 
     return NULL;
 }
@@ -214,7 +209,7 @@ static void AddDoomWadPath(void)
         return;
     }
 
-    doomwadpath = strdup(doomwadpath);
+    doomwadpath = ogb_strdup(doomwadpath);
 
     // Add the initial directory
 
@@ -336,7 +331,7 @@ char *D_FindWADByName(char *name)
 
         if (DirIsFile(iwad_dirs[i], name) && M_FileExists(iwad_dirs[i]))
         {
-            return strdup(iwad_dirs[i]);
+            return ogb_strdup(iwad_dirs[i]);
         }
 
         // Construct a string for the full path

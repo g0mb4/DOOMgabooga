@@ -16,13 +16,6 @@
 //	All the clipping: columns, horizontal spans, sky columns.
 //
 
-
-
-
-
-
-#include <stdlib.h>
-
 #include "i_system.h"
 
 #include "doomdef.h"

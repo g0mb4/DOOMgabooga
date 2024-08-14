@@ -32,6 +32,9 @@ typedef struct Context_Extra {
 
 #include "oogabooga/oogabooga.c"
 
+#include "doomgeneric/oogabooga_helpers.c"
+#include "entry_doomgabooga.c"
+
 #include "doomgeneric/am_map.c"
 #include "doomgeneric/d_event.c"
 #include "doomgeneric/d_items.c"
@@ -115,6 +118,4 @@ typedef struct Context_Extra {
 #include "doomgeneric/w_wad.c"
 #include "doomgeneric/wi_stuff.c"
 #include "doomgeneric/z_zone.c"    
-
-#include "entry_doomgabooga.c"               
-
+          

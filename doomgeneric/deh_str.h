@@ -18,19 +18,14 @@
 #ifndef DEH_STR_H
 #define DEH_STR_H
 
+#include "oogabooga_helpers.h"
+
 // Used to do dehacked text substitutions throughout the program
 
 #define DEH_String(x) (x)
 #define DEH_printf printf
 #define DEH_fprintf fprintf
-#define DEH_snprintf(buf, size, ...)                                    \
-    do {                                                                \
-        string s = sprintf(get_heap_allocator(), __VA_ARGS__);          \
-        int count = s.count < ((size) - 1) ? s.count : ((size) - 1);    \
-        memcpy((buf), s.data, count);                                   \
-        (buf)[count] = '\0';                                            \
-    } while(0)                                                        
-    
+#define DEH_snprintf snprintf
 #define DEH_AddStringReplacement(x, y)
 
 #endif /* #ifndef DEH_STR_H */
