@@ -23,17 +23,7 @@
 #include <ctype.h>
 #include <errno.h>
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <io.h>
-#ifdef _MSC_VER
-#include <direct.h>
-#endif
-#else
-#include <sys/stat.h>
-#include <sys/types.h>
-#endif
+#define strdup _strdup
 
 #include "doomtype.h"
 
@@ -53,11 +43,7 @@
 
 void M_MakeDirectory(char *path)
 {
-#ifdef _WIN32
-    mkdir(path);
-#else
-    mkdir(path, 0755);
-#endif
+    os_make_directory_f(path, false);
 }
 
 // Check if a file exists
@@ -185,8 +171,12 @@ char *M_TempFile(char *s)
 
 boolean M_StrToInt(const char *str, int *result)
 {
+    assert(strstr(str, "0x") == NULL, "TODO: Implement M_StrToInt() properly");
+    assert(strstr(str, "0X") == NULL, "TODO: Implement M_StrToInt() properly");
+
     *result = atoi(str);
-    // TODO(gmb)
+    return true;
+
     /*
     return sscanf(str, " 0x%x", result) == 1
         || sscanf(str, " 0X%x", result) == 1

@@ -34,6 +34,8 @@
 
 #include "z_zone.h"
 
+#define strdup _strdup
+
 //
 // DEFAULTS
 //

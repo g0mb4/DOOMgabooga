@@ -28,6 +28,8 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
+#define strdup _strdup
+
 #define MAX_INSTRUMENTS 256
 
 typedef struct

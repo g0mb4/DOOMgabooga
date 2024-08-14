@@ -20,6 +20,8 @@
 #include <ctype.h>
 #include <string.h>
 
+#define strdup _strdup
+
 #include "config.h"
 #include "deh_str.h"
 #include "doomkeys.h"

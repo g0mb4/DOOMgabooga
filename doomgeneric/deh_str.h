@@ -23,7 +23,7 @@
 #define DEH_String(x) (x)
 #define DEH_printf printf
 #define DEH_fprintf fprintf
-#define DEH_snprintf(buf, size, ...)                                    \  
+#define DEH_snprintf(buf, size, ...)                                    \
     do {                                                                \
         string s = sprintf(get_heap_allocator(), __VA_ARGS__);          \
         int count = s.count < ((size) - 1) ? s.count : ((size) - 1);    \
