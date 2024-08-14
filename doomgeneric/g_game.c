@@ -1668,7 +1668,7 @@ void G_DoSaveGame (void)
 
     os_file_delete_f(savegame_file);
 
-    // TODO(gmb): rename
+    // TODO(gmb): Implement rename()
     // rename(temp_savegame_file, savegame_file);
     
     gameaction = ga_nothing;

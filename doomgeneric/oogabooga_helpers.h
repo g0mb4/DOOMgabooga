@@ -1,7 +1,6 @@
 /*
-    Compatilbility layer
-    Mostly reimplementing string.h
-*/
+ *   Compatibility layer
+ */
 
 #ifndef OOBABOOGA_HELPERS_H
 #define OOBABOOGA_HELPERS_H
