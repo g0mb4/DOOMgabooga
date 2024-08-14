@@ -12,7 +12,6 @@ Some memory related crashes are expected.
 I hope I changed every `%s` to `%cs` in `printf()`, but it might not be the case.
 
 ## TODO
-+ better input handling
 + sound
 + general cleanup
-
++ fix warnings
