@@ -31,6 +31,11 @@
 #define NUM_CHANNELS 16
 #define NUM_MIDI_CHANNELS 16
 
+static sfxinfo_t *channels_playing[NUM_CHANNELS];
+static Audio_Player *audio_players[NUM_CHANNELS];
+
+static bool use_sfx_prefix;
+
 int use_libsamplerate = 0;
 
 // Scale factor used when converting libsamplerate floating point numbers
@@ -41,8 +46,120 @@ int use_libsamplerate = 0;
 
 float libsamplerate_scale = 0.65f;
 
+static Audio_Source* create_audio_source(void* data, int len, int sample_rate){
+	Audio_Source *src = alloc(get_heap_allocator(), sizeof(Audio_Source));
+	assert(src, "Unable to create source.");
+
+	src->kind = AUDIO_SOURCE_MEMORY;
+	src->format = (Audio_Format){
+		.bit_width = AUDIO_BITS_16,
+		.channels = 2,
+		.sample_rate = sample_rate,
+	};
+	src->allocator = get_heap_allocator();
+	// TODO: Fill other fields
+
+	// TODO: ExpandSoundData_SRC from i_sdlsound
+
+	return src;
+}
+
+// Load and convert a sound effect
+// Returns true if successful
+
+static bool CacheSFX(sfxinfo_t *sfxinfo)
+{
+	int lumpnum;
+	unsigned int lumplen;
+	int samplerate;
+	unsigned int length;
+	u8 *data;
+
+	// need to load the sound
+
+	lumpnum = sfxinfo->lumpnum;
+	data = W_CacheLumpNum(lumpnum, PU_STATIC);
+	lumplen = W_LumpLength(lumpnum);
+
+	// Check the header, and ensure this is a valid sound
+
+	if (lumplen < 8 || data[0] != 0x03 || data[1] != 0x00) {
+		// Invalid sound
+		return false;
+	}
+
+	// 16 bit sample rate field, 32 bit length field
+	samplerate = (data[3] << 8) | data[2];
+	length = (data[7] << 24) | (data[6] << 16) | (data[5] << 8) | data[4];
+
+	// If the header specifies that the length of the sound is greater than
+	// the length of the lump itself, this is an invalid sound lump
+
+	// We also discard sound lumps that are less than 49 samples long,
+	// as this is how DMX behaves - although the actual cut-off length
+	// seems to vary slightly depending on the sample rate.  This needs
+	// further investigation to better understand the correct
+	// behavior.
+
+	if (length > lumplen - 8 || length <= 48){
+		return false;
+	}
+
+	// The DMX sound library seems to skip the first 16 and last 16
+	// bytes of the lump - reason unknown.
+
+	data += 16;
+	length -= 32;
+
+	Audio_Source *src = create_audio_source(data, length, samplerate);
+	sfxinfo->driver_data = src;
+
+	// don't need the original lump any more
+
+	W_ReleaseLumpNum(lumpnum);
+
+	return true;
+}
+
+static void GetSfxLumpName(sfxinfo_t *sfx, char *buf, size_t buf_len)
+{
+    // Linked sfx lumps? Get the lump number for the sound linked to.
+
+    if (sfx->link != NULL){
+        sfx = sfx->link;
+    }
+
+    // Doom adds a DS* prefix to sound lumps; Heretic and Hexen don't
+    // do this.
+
+    if (use_sfx_prefix){
+        M_snprintf(buf, buf_len, "ds%s", DEH_String(sfx->name));
+    } else {
+        M_StringCopy(buf, DEH_String(sfx->name), buf_len);
+    }
+}
+
 static void I_OGB_PrecacheSounds(sfxinfo_t *sounds, int num_sounds){
-	printf("%cs: %d\n", __func__, num_sounds);
+	char namebuf[9];
+	int i;
+
+	printf("I_OGB_PrecacheSounds: Precaching all sound effects..");
+
+	for (int i = 0; i < num_sounds; ++i){
+		if ((i % 6) == 0){
+			printf(".");
+		}
+
+		GetSfxLumpName(&sounds[i], namebuf, sizeof(namebuf));
+
+		sounds[i].lumpnum = W_CheckNumForName(namebuf);
+
+		if (sounds[i].lumpnum != -1){
+			CacheSFX(&sounds[i]);
+		}
+	}
+
+	printf("\n");
 }
 
 //
@@ -51,12 +168,24 @@ static void I_OGB_PrecacheSounds(sfxinfo_t *sounds, int num_sounds){
 //
 
 static int I_OGB_GetSfxLumpNum(sfxinfo_t *sfx){
-	printf("%cs\n", __func__);
-	return 0;
+	char namebuf[9];
+
+	GetSfxLumpName(sfx, namebuf, sizeof(namebuf));
+
+	return W_GetNumForName(namebuf);
 }
 
 static void I_OGB_UpdateSoundParams(int handle, int vol, int sep){
-	printf("%cs\n: vol: %d, sep: %d\n", __func__, vol, sep);
+	if (handle < 0 || handle >= NUM_CHANNELS){
+		return;
+	}
+
+	if (channels_playing[handle] == NULL) {
+		return;
+	}
+
+	// TODO(gmb): Check range on vol
+	audio_players[handle]->config.volume = vol;
 }
 
 //
@@ -72,36 +201,104 @@ static void I_OGB_UpdateSoundParams(int handle, int vol, int sep){
 //  is set, but currently not used by mixing.
 //
 static int I_OGB_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep){
-	printf("%cs: vol: %d, sep: %d\n", __func__, vol, sep);
-	return 1;
+	// TODO(gmb): Remove this, 
+	return -1;
+
+	if (channel < 0 || channel >= NUM_CHANNELS){
+		return -1;
+	}
+
+	// Release a sound effect if there is already one playing
+	// on this channel
+	if (channels_playing[channel]) {
+		channels_playing[channel] = NULL;
+
+		audio_player_set_state(audio_players[channel], AUDIO_PLAYER_STATE_PAUSED);
+		if(audio_players[channel]->has_source){
+			audio_source_destroy(&audio_players[channel]->source);
+		}
+	}
+
+	// Get the sound data
+	if (sfxinfo->driver_data == NULL){
+		if (!CacheSFX(sfxinfo)){
+			return -1;
+		}
+	}
+	assert(sfxinfo->driver_data, "Invalid SFX driver data");
+
+	Audio_Source * src = (Audio_Source*)sfxinfo->driver_data;
+
+	// TODO(gmb): Check range on vol
+	audio_players[channel]->config.volume = vol;
+	audio_player_set_source(audio_players[channel], *src);
+	audio_player_set_state(audio_players[channel], AUDIO_PLAYER_STATE_PLAYING);
+
+	channels_playing[channel] = sfxinfo;
+	return channel;
 }
 
 static void I_OGB_StopSound(int handle){
-	printf("%cs\n", __func__);
+	if (handle < 0 || handle >= NUM_CHANNELS){
+		return;
+	}
+
+	channels_playing[handle] = NULL;
+
+	audio_player_set_state(audio_players[handle], AUDIO_PLAYER_STATE_PAUSED);
+	if(audio_players[handle]->has_source){
+		audio_source_destroy(&audio_players[handle]->source);
+	}
 }
 
 static bool I_OGB_SoundIsPlaying(int handle){
-	printf("%cs\n", __func__);
-	return false;
+	if (handle < 0 || handle >= NUM_CHANNELS){
+		return false;
+	}
+
+	const f64 prog = audio_player_get_current_progression_factor(audio_players[handle]);
+	return prog < 1.0;
 }
 
 // 
 // Periodically called to update the sound system
 //
 static void I_OGB_UpdateSound(void){
-	printf("%cs\n", __func__);
+	// loop through all channels which have sample, check if they're finished
+	for (int i = 0; i < NUM_CHANNELS; i++) {
+		if (channels_playing[i]) {
+			const f64 prog = audio_player_get_current_progression_factor(audio_players[i]);
+			if (prog >= 1.0) {
+				channels_playing[i] = NULL;
+			}
+		}
+	}
 }
 
+static void I_OGB_ShutdownSound(void){
+	for (int i = 0; i < NUM_CHANNELS; ++i) {
+		if (channels_playing[i] != NULL) {
+			channels_playing[i] = NULL;
 
-static void I_OGB_ShutdownSound(void)
-{
-	printf("%cs\n", __func__);
+			audio_player_set_state(audio_players[i], AUDIO_PLAYER_STATE_PAUSED);
+			if(audio_players[i]->has_source){
+				audio_source_destroy(&audio_players[i]->source);
+			}
+		}
+	}
 }
 
+static bool I_OGB_InitSound(bool _use_sfx_prefix){
+	use_sfx_prefix = _use_sfx_prefix;
 
-static bool I_OGB_InitSound(bool _use_sfx_prefix)
-{
-	printf("%cs: %d\n", __func__, _use_sfx_prefix);
+	// No sounds yet
+	for (int i = 0; i < NUM_CHANNELS; ++i) {
+		channels_playing[i] = NULL;
+		audio_players[i] = audio_player_get_one();
+		assert(audio_players[i], "Unable to get an audio player");
+		audio_player_set_state(audio_players[i], AUDIO_PLAYER_STATE_PAUSED);
+	}
+	
 	return true;
 }
 
