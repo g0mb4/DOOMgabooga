@@ -210,7 +210,7 @@ STlib_updateMultIcon
     if (*mi->on && (mi->oldinum != *mi->inum || refresh) && (*mi->inum != -1))
     {
         // TODO(gmb): This guard was NOT here, I broke something.
-        if(mi && mi->p[mi->oldinum] && mi->p[*mi->inum]){
+        if(mi && mi->p[mi->oldinum] && mi->inum && mi->p[*mi->inum]){
             if (mi->oldinum != -1)
             {
                 x = mi->x - SHORT(mi->p[mi->oldinum]->leftoffset);
