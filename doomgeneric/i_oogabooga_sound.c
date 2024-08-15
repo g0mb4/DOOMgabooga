@@ -46,6 +46,48 @@ int use_libsamplerate = 0;
 
 float libsamplerate_scale = 0.65f;
 
+// 0-256 -> 0 - 1
+static f32 set_volume(int vol){
+	return ((f32)(vol) / 256.0);
+}
+
+static void destroy_channel_and_audio_source(int channel){
+	if (channel < 0 || channel >= NUM_CHANNELS){
+		return;
+	}
+
+	if (channels_playing[channel]) {
+		audio_player_set_state(audio_players[channel], AUDIO_PLAYER_STATE_PAUSED);
+		if(audio_players[channel]->has_source){
+			audio_source_destroy(&audio_players[channel]->source);
+		}
+
+		if(channels_playing[channel]->driver_data){
+			dealloc(get_heap_allocator(), channels_playing[channel]->driver_data);
+		}
+
+		channels_playing[channel] = NULL;
+	}
+}
+
+/*
+	unsigned 8 bits --> signed 16 bits
+	mono --> stereo
+*/
+static void convert_to_pcm(Audio_Source *src, u8 *data, int len){
+	src->pcm_frames = alloc(src->allocator, len * sizeof(s16) * 2);
+	assert(src->pcm_frames, "Unable to allocat PCM frames.");
+
+	u32 f = 0;
+	s16 *pcm_s16 = (s16 *)src->pcm_frames;
+	for(int i = 0; i < len; ++i){
+		const f32 scale = (f32)data[i] / 127.5 - 1;
+		const s16 val = (s16)((f32)INT16_MAX * scale);
+		pcm_s16[f++] = val;	// left
+		pcm_s16[f++] = val;	// right
+	}
+}
+
 static Audio_Source* create_audio_source(void* data, int len, int sample_rate){
 	Audio_Source *src = alloc(get_heap_allocator(), sizeof(Audio_Source));
 	assert(src, "Unable to create source.");
@@ -57,18 +99,19 @@ static Audio_Source* create_audio_source(void* data, int len, int sample_rate){
 		.sample_rate = sample_rate,
 	};
 	src->allocator = get_heap_allocator();
-	// TODO: Fill other fields
+	src->number_of_frames = len;
+	src->uid = next_audio_source_uid++;
 
-	// TODO: ExpandSoundData_SRC from i_sdlsound
+	mutex_init(&src->mutex_for_destroy);
 
+	convert_to_pcm(src, (u8*)data, len);
 	return src;
 }
 
 // Load and convert a sound effect
 // Returns true if successful
 
-static bool CacheSFX(sfxinfo_t *sfxinfo)
-{
+static bool CacheSFX(sfxinfo_t *sfxinfo){
 	int lumpnum;
 	unsigned int lumplen;
 	int samplerate;
@@ -180,12 +223,8 @@ static void I_OGB_UpdateSoundParams(int handle, int vol, int sep){
 		return;
 	}
 
-	if (channels_playing[handle] == NULL) {
-		return;
-	}
-
-	// TODO(gmb): Check range on vol
-	audio_players[handle]->config.volume = vol;
+	assert(audio_players[handle], "Invalied audio player: %d", handle);
+	audio_players[handle]->config.volume = set_volume(vol);
 }
 
 //
@@ -201,23 +240,13 @@ static void I_OGB_UpdateSoundParams(int handle, int vol, int sep){
 //  is set, but currently not used by mixing.
 //
 static int I_OGB_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep){
-	// TODO(gmb): Remove this, 
-	return -1;
-
 	if (channel < 0 || channel >= NUM_CHANNELS){
 		return -1;
 	}
 
 	// Release a sound effect if there is already one playing
 	// on this channel
-	if (channels_playing[channel]) {
-		channels_playing[channel] = NULL;
-
-		audio_player_set_state(audio_players[channel], AUDIO_PLAYER_STATE_PAUSED);
-		if(audio_players[channel]->has_source){
-			audio_source_destroy(&audio_players[channel]->source);
-		}
-	}
+	destroy_channel_and_audio_source(channel);
 
 	// Get the sound data
 	if (sfxinfo->driver_data == NULL){
@@ -229,8 +258,9 @@ static int I_OGB_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep){
 
 	Audio_Source * src = (Audio_Source*)sfxinfo->driver_data;
 
-	// TODO(gmb): Check range on vol
-	audio_players[channel]->config.volume = vol;
+	audio_players[channel]->config.volume = set_volume(vol);
+	audio_players[channel]->config.playback_speed = 1.0;
+
 	audio_player_set_source(audio_players[channel], *src);
 	audio_player_set_state(audio_players[channel], AUDIO_PLAYER_STATE_PLAYING);
 
@@ -243,12 +273,7 @@ static void I_OGB_StopSound(int handle){
 		return;
 	}
 
-	channels_playing[handle] = NULL;
-
-	audio_player_set_state(audio_players[handle], AUDIO_PLAYER_STATE_PAUSED);
-	if(audio_players[handle]->has_source){
-		audio_source_destroy(&audio_players[handle]->source);
-	}
+	destroy_channel_and_audio_source(handle);
 }
 
 static bool I_OGB_SoundIsPlaying(int handle){
@@ -269,7 +294,7 @@ static void I_OGB_UpdateSound(void){
 		if (channels_playing[i]) {
 			const f64 prog = audio_player_get_current_progression_factor(audio_players[i]);
 			if (prog >= 1.0) {
-				channels_playing[i] = NULL;
+				destroy_channel_and_audio_source(i);
 			}
 		}
 	}
@@ -277,14 +302,7 @@ static void I_OGB_UpdateSound(void){
 
 static void I_OGB_ShutdownSound(void){
 	for (int i = 0; i < NUM_CHANNELS; ++i) {
-		if (channels_playing[i] != NULL) {
-			channels_playing[i] = NULL;
-
-			audio_player_set_state(audio_players[i], AUDIO_PLAYER_STATE_PAUSED);
-			if(audio_players[i]->has_source){
-				audio_source_destroy(&audio_players[i]->source);
-			}
-		}
+		destroy_channel_and_audio_source(i);
 	}
 }
 
@@ -326,4 +344,3 @@ sound_module_t DG_sound_module =
 	I_OGB_SoundIsPlaying,
 	I_OGB_PrecacheSounds,
 };
-

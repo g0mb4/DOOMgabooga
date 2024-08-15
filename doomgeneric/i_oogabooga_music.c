@@ -38,57 +38,56 @@
 
 // Shutdown music
 static void I_OGB_ShutdownMusic(void){
-	printf("%cs\n", __func__);
+	// TODO(gmb)
 }
 
 // Initialize music subsystem
 static bool I_OGB_InitMusic(void){
-	printf("%cs\n", __func__);
+	// TODO(gmb)
 	return true;
 }
 
 // Set music volume (0 - 127)
 static void I_OGB_SetMusicVolume(int volume){
-	printf("%cs: %d\n", __func__, volume);
+	// TODO(gmb)
 }
 
 // Start playing a mid
 static void I_OGB_PlaySong(void *handle, bool looping){
-	printf("%cs: loop: %d\n", __func__, looping);
+	// TODO(gmb)
 }
 
 static void I_OGB_PauseSong(void){
-	printf("%cs\n", __func__);
+	// TODO(gmb)
 }
 
 static void I_OGB_ResumeSong(void){
-	printf("%cs\n", __func__);
+	// TODO(gmb)
 }
 
 static void I_OGB_StopSong(void){
-	printf("%cs\n", __func__);
+	// TODO(gmb)
 }
 
 static void I_OGB_UnRegisterSong(void *handle){
-	printf("%cs\n", __func__);
+	// TODO(gmb)
 }
 
 static void *I_OGB_RegisterSong(void *data, int len){
-	printf("%cs\n", __func__);
+	// TODO(gmb)
 	return NULL;
 }
 
-
 // Is the song playing?
 static bool I_OGB_MusicIsPlaying(void){
-	printf("%cs\n", __func__);
+	// TODO(gmb)
 	return false;
 }
 
 // Poll music position; if we have passed the loop point end position
 // then we need to go back.
 static void I_OGB_PollMusic(void){
-	printf("%cs\n", __func__);
+	// TODO(gmb)
 }
 
 static snddevice_t music_OGB_devices[] =

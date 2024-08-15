@@ -14,7 +14,7 @@ I hope I changed every `%s` to `%cs` in `printf()`, but it might not be the case
 No multiplayer.
 
 ## TODO
-+ implement sound
++ implement music
 + general cleanup
 + remove `ORIGCODE` + other unused `#define`-s
 + fix warnings
