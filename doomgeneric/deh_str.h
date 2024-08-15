@@ -20,13 +20,10 @@
 
 #include "oogabooga_helpers.h"
 
-// Used to do dehacked text substitutions throughout the program
-
 #define DEH_String(x) (x)
 #define DEH_printf printf
 #define DEH_fprintf fprintf
 #define DEH_snprintf snprintf
 #define DEH_AddStringReplacement(x, y)
 
-#endif /* #ifndef DEH_STR_H */
-
+#endif /* DEH_STR_H */

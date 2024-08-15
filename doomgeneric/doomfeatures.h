@@ -23,7 +23,7 @@
 //#define FEATURE_WAD_MERGE
 
 // Enables dehacked support ('-deh')
-// NOTE(gmb): Removed
+// NOTE(gmb): Some DEH_ functions from deh_str.h are removed.
 // #undef FEATURE_DEHACKED
 
 // Enables multiplayer support (network games)
@@ -33,5 +33,3 @@
 #define FEATURE_SOUND
 
 #endif /* DOOM_FEATURES_H */
-
-
