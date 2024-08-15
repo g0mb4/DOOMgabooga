@@ -16,6 +16,6 @@ No multiplayer.
 ## TODO
 + implement sound
 + general cleanup
-+ remove ORIGCODE
++ remove `ORIGCODE` + other unused `#define`-s
 + fix warnings
-+ fix TODO(gmb)s
++ fix `TODO(gmb)`s
