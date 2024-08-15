@@ -23,18 +23,6 @@
 #ifdef FEATURE_SOUND
 
 
-#ifdef __DJGPP__
-
-
-#define SHORT(x)  ((signed short) (x))
-#define LONG(x)   ((signed int) (x))
-
-#define SYS_LITTLE_ENDIAN
-
-
-#else  // __DJGPP__
-
-
 #include <SDL_endian.h>
 
 // Endianess handling.
@@ -67,10 +55,6 @@
 #else
 #define doom_wtohs(x) (short int)(x)
 #endif
-
-
-#endif  // __DJGPP__
-
 
 #else  // FEATURE_SOUND
 	

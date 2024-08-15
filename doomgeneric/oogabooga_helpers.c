@@ -1,7 +1,7 @@
 #include "oogabooga_helpers.h"
 
 char * ogb_strdup(const char *s){
-    assert(s, "String is NULL.");
+    assert(s, "string is NULL");
     const u32 len = strlen(s) + 1;  // + '\0'
 
     char *s_dup = alloc(get_heap_allocator(), len);

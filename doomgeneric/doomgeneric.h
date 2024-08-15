@@ -1,7 +1,6 @@
 #ifndef DOOM_GENERIC
 #define DOOM_GENERIC
 
-#include <stdint.h>
 #include "i_video.h"
 
 typedef uint32_t pixel_t;

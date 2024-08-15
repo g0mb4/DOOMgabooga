@@ -16,7 +16,6 @@
 //     to the IWAD type.
 //
 
-#include "config.h"
 #include "deh_str.h"
 #include "doomkeys.h"
 #include "d_iwad.h"
@@ -28,6 +27,8 @@
 #include "z_zone.h"
 
 #include "oogabooga_helpers.h"
+
+#define FILES_DIR "."
 
 static const iwad_t iwads[] =
 {

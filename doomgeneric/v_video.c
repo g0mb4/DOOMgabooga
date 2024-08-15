@@ -19,8 +19,6 @@
 //	Functions to blit a block to the screen.
 //
 
-#include <math.h>
-
 #include "i_system.h"
 
 #include "doomtype.h"
@@ -33,11 +31,6 @@
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
-
-#include "config.h"
-#ifdef HAVE_LIBPNG
-#include <png.h>
-#endif
 
 // TODO: There are separate RANGECHECK defines for different games, but this
 // is common code. Fix this.

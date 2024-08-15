@@ -6,7 +6,9 @@
 	],
 	"settings": {
 		"files.associations": {
-			"algorithm": "c"
+			"algorithm": "c",
+			"oogabooga_helpers.h": "c",
+			"d_iwad.h": "c"
 		}
 	}
 }

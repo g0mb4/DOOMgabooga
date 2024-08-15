@@ -16,9 +16,6 @@
 //	The status bar widget code.
 //
 
-
-#include <ctype.h>
-
 #include "deh_main.h"
 #include "doomdef.h"
 

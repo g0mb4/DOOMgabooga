@@ -20,8 +20,6 @@
 #ifndef __M_MISC__
 #define __M_MISC__
 
-#include <stdarg.h>
-
 #include "doomtype.h"
 
 boolean M_WriteFile(char *name, void *source, int length);

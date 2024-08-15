@@ -5,6 +5,10 @@
 #ifndef OOBABOOGA_HELPERS_H
 #define OOBABOOGA_HELPERS_H
 
+// reimplement these?
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+
 #define snprintf(buf, size, ...)                                        \
     do {                                                                \
         string s = sprintf(get_heap_allocator(), __VA_ARGS__);          \

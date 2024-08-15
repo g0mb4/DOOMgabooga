@@ -144,29 +144,21 @@ char *M_TempFile(char *s)
 {
     char *tempdir;
 
-#if defined(_WIN32) || defined(__DJGPP__)
-
     // Check the TEMP environment variable to find the location.
-
     tempdir = getenv("TEMP");
 
     if (tempdir == NULL)
     {
         tempdir = ".";
     }
-#else
-    // In Unix, just use /tmp.
-
-    tempdir = "/tmp";
-#endif
 
     return M_StringJoin(tempdir, DIR_SEPARATOR_S, s, NULL);
 }
 
 boolean M_StrToInt(const char *str, int *result)
 {
-    assert(strstr(str, "0x") == NULL, "TODO: Implement M_StrToInt() properly");
-    assert(strstr(str, "0X") == NULL, "TODO: Implement M_StrToInt() properly");
+    assert(strstr(str, "0x") == NULL, "TODO(gmb): Implement M_StrToInt() properly");
+    assert(strstr(str, "0X") == NULL, "TODO(gmb): Implement M_StrToInt() properly");
 
     *result = atoi(str);
     return true;

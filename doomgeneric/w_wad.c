@@ -18,7 +18,6 @@
 
 #include "doomtype.h"
 
-#include "config.h"
 #include "d_iwad.h"
 #include "i_swap.h"
 #include "i_system.h"

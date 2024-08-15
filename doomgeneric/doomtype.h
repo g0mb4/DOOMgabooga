@@ -17,25 +17,8 @@
 //	 separating modules.
 //    
 
-
 #ifndef __DOOMTYPE__
 #define __DOOMTYPE__
-
-// #define macros to provide functions missing in Windows.
-// Outside Windows, we use strings.h for str[n]casecmp.
-
-
-#ifdef _WIN32
-
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-
-#else
-
-#include <strings.h>
-
-#endif
-
 
 //
 // The packed attribute forces structures to be packed into the minimum 
@@ -60,25 +43,11 @@
 // pre-standardisation version).  inttypes.h is also in the C99 
 // standard and defined to include stdint.h, so include this. 
 
-#include <inttypes.h>
-
 typedef uint8_t byte;
-
-#include <limits.h>
-
-#if defined(_WIN32) || defined(__DJGPP__)
 
 #define DIR_SEPARATOR '\\'
 #define DIR_SEPARATOR_S "\\"
 #define PATH_SEPARATOR ';'
-
-#else
-
-#define DIR_SEPARATOR '/'
-#define DIR_SEPARATOR_S "/"
-#define PATH_SEPARATOR ':'
-
-#endif
 
 #define arrlen(array) (sizeof(array) / sizeof(*array))
 

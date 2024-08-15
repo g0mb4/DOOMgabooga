@@ -17,8 +17,6 @@
 //    Configuration file interface.
 //
 
-#include "config.h"
-
 #include "doomtype.h"
 #include "doomkeys.h"
 #include "doomfeatures.h"
@@ -1713,7 +1711,7 @@ static int ParseIntParameter(char *strparm)
     int parm;
 
     if (strparm[0] == '0' && strparm[1] == 'x'){
-        assert(false, "TODO: implement sscanf()");
+        assert(false, "TODO(gmb): implement sscanf()");
         //sscanf(strparm+2, "%x", &parm);
     } else {
         parm = atoi(strparm);

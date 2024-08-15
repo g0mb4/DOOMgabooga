@@ -13,7 +13,6 @@
 // GNU General Public License for more details.
 //
 
-#include "config.h"
 #include "deh_str.h"
 #include "doomtype.h"
 #include "doomkeys.h"

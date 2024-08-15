@@ -19,7 +19,6 @@
 //	and call the startup functions.
 //
 
-#include "config.h"
 #include "deh_main.h"
 #include "doomdef.h"
 #include "doomstat.h"
@@ -69,6 +68,9 @@
 #include "d_main.h"
 
 #include "oogabooga_helpers.h"
+
+#define PACKAGE_STRING "DOOMgabooga 0.1"
+#define PROGRAM_PREFIX "doomgabooga"
 
 //
 // D-DoomLoop()

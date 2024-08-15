@@ -16,8 +16,6 @@
 //	Game completion, final screen animation.
 //
 
-#include <ctype.h>
-
 // Functions.
 #include "deh_main.h"
 #include "i_system.h"
