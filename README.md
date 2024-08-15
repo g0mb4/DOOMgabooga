@@ -11,6 +11,8 @@ Some memory related crashes are expected.
 
 I hope I changed every `%s` to `%cs` in `printf()`, but it might not be the case.
 
+Sound support is work in progress, comment `#define FEATURE_SOUND` in *doomgeneric/doomfeatures.h* to disable it and get a bit more stable version.
+
 No multiplayer.
 
 ## TODO
