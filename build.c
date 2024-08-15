@@ -60,6 +60,8 @@ typedef struct Context_Extra {
 #include "doomgeneric/i_joystick.c"
 #include "doomgeneric/i_scale.c"
 #include "doomgeneric/i_sound.c"
+#include "doomgeneric/i_oogabooga_sound.c"
+#include "doomgeneric/i_oogabooga_music.c"
 #include "doomgeneric/i_system.c"
 #include "doomgeneric/i_timer.c"
 #include "doomgeneric/i_video.c"

@@ -23,13 +23,17 @@
 
 #undef FEATURE_WAD_MERGE
 
+// Enables dehacked support ('-deh')
+// NOTE(gmb): Removed
+// #undef FEATURE_DEHACKED
+
 // Enables multiplayer support (network games)
 
 #undef FEATURE_MULTIPLAYER
 
 // Enables sound output
 
-#undef FEATURE_SOUND
+#define FEATURE_SOUND
 
 #endif /* #ifndef DOOM_FEATURES_H */
 

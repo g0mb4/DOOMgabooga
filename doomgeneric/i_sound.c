@@ -18,9 +18,6 @@
 #include "doomfeatures.h"
 #include "doomtype.h"
 
-#ifdef ORIGCODE
-#include "gusconf.h"
-#endif
 #include "i_sound.h"
 #include "i_video.h"
 #include "m_argv.h"
@@ -294,7 +291,7 @@ void I_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 {
     if (sound_module != NULL && sound_module->CacheSounds != NULL)
     {
-	sound_module->CacheSounds(sounds, num_sounds);
+	    sound_module->CacheSounds(sounds, num_sounds);
     }
 }
 
