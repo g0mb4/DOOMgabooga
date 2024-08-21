@@ -16,7 +16,8 @@ Sound support is work in progress, comment `#define FEATURE_SOUND` in *doomgener
 No multiplayer.
 
 ## TODO
-+ implement music
++ implement music (play MIDI)
++ port file operations (`fopen(..., "w[b]")` is buggy)
 + general cleanup
 + remove `ORIGCODE` + other unused `#define`-s
 + fix warnings
