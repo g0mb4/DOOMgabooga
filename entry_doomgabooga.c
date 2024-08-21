@@ -3,7 +3,6 @@
 #include "doomgeneric/m_argv.h"
 
 Gfx_Image *image = NULL;
-f64 start_time = 0;
 
 #define IMAGE_WIDTH 640
 #define IMAGE_HEIGHT 400
@@ -77,6 +76,8 @@ static void poll_keys(void){
 
   K('_', '_');
   K('.', '.');
+
+  // TODO(gmb): Add remainnig keys from doomkeys.h
 }
 
 Gfx_Image * create_image(int width, int height){
@@ -105,12 +106,11 @@ void DG_Init() {
   window.title = STR("DOOMgabooga");
 
   image = create_image(SCREENWIDTH, SCREENHEIGHT);
-  start_time = os_get_current_time_in_seconds();
 }
 
 void DG_DrawFrame() {
   draw_frame.projection = m4_make_orthographic_projection(0, window.width, 0, window.height, -1, 10);
-  draw_frame.view = m4_scalar(1.0);
+  draw_frame.camera_xform = m4_scalar(1.0);
 
   gfx_set_image_data(image, 0, 0, SCREENWIDTH, SCREENHEIGHT, DG_ScreenBuffer);
   draw_image(image, v2(0, 0), v2(IMAGE_WIDTH, IMAGE_HEIGHT), COLOR_WHITE);
@@ -126,7 +126,7 @@ void DG_SleepMs(u32 ms) {
 }
 
 u32 DG_GetTicksMs() {
-  const f64 elapsed = os_get_current_time_in_seconds() - start_time;
+  const f64 elapsed = os_get_elapsed_seconds();
   return (u32)(elapsed * 1000.0);
 }
 
