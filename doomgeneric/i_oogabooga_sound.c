@@ -28,11 +28,10 @@
 
 #include "doomtype.h"
 
-#define NUM_CHANNELS 16
-#define NUM_MIDI_CHANNELS 16
+#define NUM_SND_CHANNELS 16
 
-static sfxinfo_t *channels_playing[NUM_CHANNELS];
-static Audio_Player *audio_players[NUM_CHANNELS];
+static sfxinfo_t *channels_playing[NUM_SND_CHANNELS];
+static Audio_Player *audio_players[NUM_SND_CHANNELS];
 
 static bool use_sfx_prefix;
 
@@ -46,24 +45,21 @@ int use_libsamplerate = 0;
 
 float libsamplerate_scale = 0.65f;
 
-// 0-256 -> 0 - 1
+// 0 - 127 -> 0.0 - 1.0
 static f32 set_volume(int vol){
-	return ((f32)(vol) / 256.0);
+	return ((f32)(vol) / 127.0);
 }
 
 static void destroy_channel_and_audio_source(int channel){
-	if (channel < 0 || channel >= NUM_CHANNELS){
+	if (channel < 0 || channel >= NUM_SND_CHANNELS){
 		return;
 	}
 
 	if (channels_playing[channel]) {
-		audio_player_set_state(audio_players[channel], AUDIO_PLAYER_STATE_PAUSED);
-		if(audio_players[channel]->has_source){
-			audio_source_destroy(&audio_players[channel]->source);
-		}
+		Audio_Source *src = (Audio_Source *)channels_playing[channel]->driver_data;
 
-		if(channels_playing[channel]->driver_data){
-			dealloc(get_heap_allocator(), channels_playing[channel]->driver_data);
+		if (src){
+			//audio_source_destroy(src);
 		}
 
 		channels_playing[channel] = NULL;
@@ -113,9 +109,9 @@ static Audio_Source* create_audio_source(void* data, int len, int sample_rate){
 
 static bool CacheSFX(sfxinfo_t *sfxinfo){
 	int lumpnum;
-	unsigned int lumplen;
+	u32 lumplen;
 	int samplerate;
-	unsigned int length;
+	u32 length;
 	u8 *data;
 
 	// need to load the sound
@@ -155,6 +151,11 @@ static bool CacheSFX(sfxinfo_t *sfxinfo){
 	length -= 32;
 
 	Audio_Source *src = create_audio_source(data, length, samplerate);
+
+	if(sfxinfo->driver_data){
+		dealloc(get_heap_allocator(), sfxinfo->driver_data);
+	}
+
 	sfxinfo->driver_data = src;
 
 	// don't need the original lump any more
@@ -219,11 +220,10 @@ static int I_OGB_GetSfxLumpNum(sfxinfo_t *sfx){
 }
 
 static void I_OGB_UpdateSoundParams(int handle, int vol, int sep){
-	if (handle < 0 || handle >= NUM_CHANNELS){
+	if (handle < 0 || handle >= NUM_SND_CHANNELS){
 		return;
 	}
 
-	assert(audio_players[handle], "Invalied audio player: %d", handle);
 	audio_players[handle]->config.volume = set_volume(vol);
 }
 
@@ -240,7 +240,7 @@ static void I_OGB_UpdateSoundParams(int handle, int vol, int sep){
 //  is set, but currently not used by mixing.
 //
 static int I_OGB_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep){
-	if (channel < 0 || channel >= NUM_CHANNELS){
+	if (channel < 0 || channel >= NUM_SND_CHANNELS){
 		return -1;
 	}
 
@@ -261,62 +261,62 @@ static int I_OGB_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep){
 	audio_players[channel]->config.volume = set_volume(vol);
 	audio_players[channel]->config.playback_speed = 1.0;
 
+	audio_players[channel] = audio_player_get_one();
+	assert(audio_players[channel], "Unable to get an audio player");
+
 	audio_player_set_source(audio_players[channel], *src);
 	audio_player_set_state(audio_players[channel], AUDIO_PLAYER_STATE_PLAYING);
+	audio_players[channel]->release_when_done = true;
 
 	channels_playing[channel] = sfxinfo;
 	return channel;
 }
 
 static void I_OGB_StopSound(int handle){
-	if (handle < 0 || handle >= NUM_CHANNELS){
+	if (handle < 0 || handle >= NUM_SND_CHANNELS){
 		return;
 	}
 
-	destroy_channel_and_audio_source(handle);
+	audio_player_set_state(audio_players[handle], AUDIO_PLAYER_STATE_PAUSED);
 }
 
 static bool I_OGB_SoundIsPlaying(int handle){
-	if (handle < 0 || handle >= NUM_CHANNELS){
+	if (handle < 0 || handle >= NUM_SND_CHANNELS){
 		return false;
 	}
 
-	const f64 prog = audio_player_get_current_progression_factor(audio_players[handle]);
-	return prog < 1.0;
+	return audio_players[handle]->allocated;
 }
 
 // 
 // Periodically called to update the sound system
 //
 static void I_OGB_UpdateSound(void){
-	// loop through all channels which have sample, check if they're finished
-	for (int i = 0; i < NUM_CHANNELS; i++) {
-		if (channels_playing[i]) {
-			const f64 prog = audio_player_get_current_progression_factor(audio_players[i]);
-			if (prog >= 1.0) {
-				destroy_channel_and_audio_source(i);
-			}
+	for (int i = 0; i < NUM_SND_CHANNELS; ++i) {
+		if (channels_playing[i] && !audio_players[i]->allocated) {
+			destroy_channel_and_audio_source(i);
 		}
 	}
 }
 
 static void I_OGB_ShutdownSound(void){
-	for (int i = 0; i < NUM_CHANNELS; ++i) {
-		destroy_channel_and_audio_source(i);
-	}
+	// NOTE(gmb): OS will handle this
 }
 
 static bool I_OGB_InitSound(bool _use_sfx_prefix){
 	use_sfx_prefix = _use_sfx_prefix;
 
-	// No sounds yet
-	for (int i = 0; i < NUM_CHANNELS; ++i) {
+	for (int i = 0; i < NUM_SND_CHANNELS; ++i) {
 		channels_playing[i] = NULL;
+
+		// NOTE(gmb): Not sure this is a right way to init the array.
 		audio_players[i] = audio_player_get_one();
 		assert(audio_players[i], "Unable to get an audio player");
+		
 		audio_player_set_state(audio_players[i], AUDIO_PLAYER_STATE_PAUSED);
+		audio_players[i]->marked_for_release = true;
 	}
-	
+
 	return true;
 }
 
